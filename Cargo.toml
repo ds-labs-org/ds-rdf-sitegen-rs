@@ -1,0 +1,12 @@
+[package]
+name = "rdf-sitegen"
+version = "0.1.0"
+edition = "2024"
+license = "Apache-2.0"
+description = "Build-time pipeline that parses a Turtle ontology/data source into Rust content constants plus served RDF (Turtle/JSON-LD) representations. Extracted from dataspace/site's build.rs, generalized for bilingual literals and pluggable output-file layouts."
+publish = false
+
+[dependencies]
+oxrdf = "0.3.4"
+oxttl = "0.2.4"
+oxjsonld = "0.2.6"
