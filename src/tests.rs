@@ -230,3 +230,17 @@ fn write_if_changed_skips_identical_content() {
   assert_eq!(std::fs::read(&path).unwrap(), b"changed");
   std::fs::remove_dir_all(&dir).ok();
 }
+
+#[test]
+fn write_rdf_files_keeps_dots_in_the_layout_path() {
+  // A versioned name like `v0.0.1` is a whole file stem, not a stem plus a
+  // `.1` extension to be replaced.
+  let o = ontology(r#"ex:v0.0.1 rdfs:label "Hello" ."#);
+  let dir = std::env::temp_dir().join(format!("rdf-sitegen-dotted-{}", std::process::id()));
+  let layout = FlatLayout { strip_prefix: "https://example.org/".into() };
+  write_rdf_files(&dir, &layout, "https://example.org/v0.0.1", &o.triples, &Prefixes(PREFIXES)).unwrap();
+  assert!(dir.join("v0.0.1.ttl").is_file(), "expected v0.0.1.ttl");
+  assert!(dir.join("v0.0.1.jsonld").is_file(), "expected v0.0.1.jsonld");
+  assert!(!dir.join("v0.0.ttl").exists(), "the last dotted segment must not be taken for an extension");
+  std::fs::remove_dir_all(&dir).ok();
+}
