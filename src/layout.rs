@@ -70,7 +70,17 @@ pub fn write_if_changed(path: &Path, content: &[u8]) -> std::io::Result<()> {
 /// `out_dir.join(layout.path_for(resource_iri))`, via [`write_if_changed`].
 pub fn write_rdf_files(out_dir: &Path, layout: &dyn FileLayout, resource_iri: &str, cbd: &[Triple], prefixes: &Prefixes) -> std::io::Result<()> {
   let base = out_dir.join(layout.path_for(resource_iri));
-  write_if_changed(&base.with_extension("ttl"), &to_turtle(cbd, prefixes))?;
-  write_if_changed(&base.with_extension("jsonld"), &to_jsonld(cbd, prefixes))?;
+  write_if_changed(&with_appended_extension(&base, "ttl"), &to_turtle(cbd, prefixes))?;
+  write_if_changed(&with_appended_extension(&base, "jsonld"), &to_jsonld(cbd, prefixes))?;
   Ok(())
+}
+
+/// `base` + `.ext`. Not `Path::with_extension`, which replaces whatever
+/// follows the last dot: `path_for` returns a path *without* extension, so a
+/// dotted local name such as `v0.0.1` would become `v0.0.ttl`.
+fn with_appended_extension(base: &Path, ext: &str) -> PathBuf {
+  let mut name = base.as_os_str().to_owned();
+  name.push(".");
+  name.push(ext);
+  PathBuf::from(name)
 }
